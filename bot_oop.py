@@ -28,6 +28,12 @@ class Phone(Field):
             raise ValueError("Phone number must contain exactly 10 digits.")
         super().__init__(value)
 
+    def __eq__(self, other):
+        """Compare phone numbers by value, not object reference."""
+        if isinstance(other, Phone):
+            return self.value == other.value
+        return False
+
 
 class Record:
     # A class for storing contact information, including name and phone list.
@@ -38,31 +44,37 @@ class Record:
 
 
     def add_phone(self, phone):
+        if isinstance(phone, str):  # If the passed phone number is a string, we create a Phone object
+            phone = Phone(phone)
+        if not isinstance(phone, Phone):
+            raise ValueError("Phone must be an instance of Phone class.")
         self.phones.append(phone)
-
-
-    def remove_phone(self, phone):
-        for p in self.phones:
-            if p.value == phone:
-                self.phones.remove(p)
-                return
-        raise ValueError("Phone number not found.")
-    
-
-    def edit_phone(self, old_phone, new_phone):
-        for i, p in enumerate(self.phones):
-            if p == old_phone:
-                self.phones[i] = Phone(new_phone)
-                return
-        raise ValueError("The phone number not found.")
     
 
     def find_phone(self, phone):
+        if isinstance(phone, str):
+            phone = Phone(phone)
         for p in self.phones:
             if p == phone:
                 return p
         return None
+
+
+    def remove_phone(self, phone):
+        phone_obj = self.find_phone(phone)  
+        if phone_obj:
+            self.phones.remove(phone_obj)
+        else:
+            raise ValueError("The phone number not found.")
     
+
+    def edit_phone(self, old_phone, new_phone):
+        phone_obj = self.find_phone(old_phone) 
+        if phone_obj:
+            self.remove_phone(old_phone)  
+            self.add_phone(new_phone)
+        else:
+            raise ValueError("The phone number not found.")
 
     def __str__(self):
         return f"Contact name: {self.name.value}, phones: {'; '.join(str(p) for p in self.phones)}"
@@ -101,8 +113,6 @@ john_record.add_phone("5555555555")
 # Додавання запису John до адресної книги
 book.add_record(john_record)
 
-print("--------------------------------------")
-
 # Створення та додавання нового запису для Jane
 jane_record = Record("Jane")
 jane_record.add_phone("9876543210")
@@ -113,6 +123,11 @@ print(book)
 
 # Знаходження та редагування телефону для John
 john = book.find("John")
+print("--------------------------------------")
+
+print(john)
+print("--------------------------------------")
+
 john.edit_phone("1234567890", "1112223333")
 
 print(john)  # Виведення: Contact name: John, phones: 1112223333; 5555555555
