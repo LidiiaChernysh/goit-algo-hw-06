@@ -69,6 +69,11 @@ class Record:
     
 
     def edit_phone(self, old_phone, new_phone):
+        try:
+            new_phone_obj = Phone(new_phone)
+        except:
+            raise ValueError("The phone number is not valid.")
+
         phone_obj = self.find_phone(old_phone) 
         if phone_obj:
             self.remove_phone(old_phone)  
@@ -128,7 +133,7 @@ print("--------------------------------------")
 print(john)
 print("--------------------------------------")
 
-john.edit_phone("1234567890", "1112223333")
+john.edit_phone("1234567890", "11122233337")
 
 print(john)  # Виведення: Contact name: John, phones: 1112223333; 5555555555
 print("--------------------------------------")
